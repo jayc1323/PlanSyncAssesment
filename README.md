@@ -25,9 +25,9 @@ Sample 401(k) plan adoption agreements are provided in the `Documents/` folder f
 
 - **Start simple**: Get a basic working version first, then add features
 - **Test with real PDFs**: The provided samples are representative of actual documents
-- **Streaming is key**: This is a core requirement—don't skip it
-- **Show your thinking**: Comments explaining design decisions are valuable
-- **Error scenarios**: Consider what can go wrong (invalid PDFs, API failures, etc.)
+- **Show your thinking**: Comments explaining why you made certain decisions are valuable
+- **AI/LLM based tools**: Use any LLM based tools you want to use or feel comfortable using. We are more interested in your thinking process and code quality.
+- **Ask questions**: If something is unclear, email me at tahmid.awal@plansync.ai
 
 ## Submission Instructions
 
