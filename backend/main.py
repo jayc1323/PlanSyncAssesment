@@ -27,31 +27,34 @@ def defaultresult():
     return "Hello World"
 
 class DocumentData(BaseModel):
-    PlanName:str = Field(description='''The official name of the retirement plan (e.g., “Acme Corp 401(k) Plan”).
+    PlanName:tuple[str | None, int | None] = Field(default= (None,None),description='''The official name of the retirement plan (e.g., “Acme Corp 401(k) Plan”).
                                 Usually found near the beginning of the document or in the General Infor-
-                                mation section''')
-    EmployerName:str = Field(description='''The legal name of the company sponsoring the plan. Often listed under
-                                        “Employer Information” and may differ slightly from the plan name.''')
-    PlanEffectiveDate: date = Field(description =''' The date the plan originally became effective. Do not confuse this with
-                                        amendment or restatement dates''')
-    EligibilityReqs:str = Field(description ='''A short text description of who can participate in the plan, typically including
-                                minimum age and service requirements. ''')
-    EmployeeContributionLimit:int = Field(description ='''The maximum percentage of compensation an employee is allowed to defer
-                                        into the plan, as stated in the document. ''')
-    EmployerMatchFormula : str = Field(description ='''A text description of how employer matching contributions are calculated
-                                    (e.g., “100% of the first 3% of compensation plus 50% of the next 2%”). ''')
-    SafeHarborStatus :bool = Field(description ='''Indicates whether the plan includes Safe Harbor contributions. Return True
-                                    if Safe Harbor contributions are explicitly permitted; otherwise return False. ''')
-    VestingSchedule:str = Field(description ='''A text description of how employer contributions vest over time (e.g., imme-
-                                    diate vesting, cliff vesting after 3 years, or graded vesting) ''')
+                                mation section and the page number you find this.Return null if not found.''')
+    EmployerName:tuple[str | None, int | None]  = Field(default= (None,None),description='''The legal name of the company sponsoring the plan. Often listed under
+                                        “Employer Information” and may differ slightly from the plan name and the page number you find this.Return null if not found.''')
+    PlanEffectiveDate: tuple[date | None, int | None]  = Field(default= (None,None),description =''' The date the plan originally became effective. Do not confuse this with
+                                        amendment or restatement dates and the page number you find this .Return null if not found.''')
+    EligibilityReqs:tuple[str | None, int | None]  = Field(default= (None,None),description ='''A short text description of who can participate in the plan, typically including
+                                minimum age and service requirements and the page number you find this .Return null if not found. ''')
+    EmployeeContributionLimit:tuple[int | None, int | None]  = Field(default= (None,None),description ='''The maximum percentage of compensation an employee is allowed to defer
+                                        into the plan, as stated in the document and the page number you find this .Return null if not found. ''')
+    EmployerMatchFormula : tuple[str | None, int | None]  = Field(default= (None,None),description ='''A text description of how employer matching contributions are calculated
+                                    (e.g., “100% of the first 3% of compensation plus 50% of the next 2%”) and the page number you find this .Return null if not found. ''')
+    SafeHarborStatus : tuple[bool | None, int | None]  = Field(default= (None,None),description ='''Indicates whether the plan includes Safe Harbor contributions. Return True
+                                    if Safe Harbor contributions are explicitly permitted; otherwise return False and the page number you find this .Return null if not found. ''')
+    VestingSchedule:tuple[str | None, int | None]  = Field(default= (None,None),description ='''A text description of how employer contributions vest over time (e.g., imme-
+                                    diate vesting, cliff vesting after 3 years, or graded vesting) and the page number you find this . Return null if not found. ''')
 
 # Helper to convert PDF to text
 def pdf_to_text(file: UploadFile) -> str:
+    # We use file.file because PdfReader expects a file-like object
     reader = PdfReader(file.file)
     text = ""
-    for page in reader.pages:
+    for i, page in enumerate(reader.pages):
         page_text = page.extract_text()
         if page_text:
+            # Adding a clear structural marker
+            text += f"\n--- PAGE {i + 1} ---\n" 
             text += page_text + "\n"
     return text
 
