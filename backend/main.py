@@ -25,7 +25,7 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-GEMINI_API_KEY = "AIzaSyCAFSXbfRbVnZaCLVHqFWhahi0U9ErflaA"
+
 LLM_MODEL = "gemini-2.5-flash"
 #other lightweight variant - "gemini-2.5-flash-lite"
 client = genai.Client(api_key=GEMINI_API_KEY)
