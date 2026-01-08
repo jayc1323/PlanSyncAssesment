@@ -55,24 +55,18 @@ export default function DocumentBox({ onRemove, triggerProcess }: { onRemove: ()
     const hasData = rawText.length > 0 || loading;
 
     return (
-        <div className={`transition-all duration-300 flex flex-row gap-6 p-6 border rounded-xl shadow-md bg-white relative ${hasData ? 'min-h-[400px]' : 'min-h-[140px]'}`}>
+        <div className={`transition-all duration-300 flex flex-row gap-6 p-6 border rounded-xl shadow-md bg-white relative ${hasData ? 'min-h-[500px]' : 'min-h-[140px]'}`}>
             <button onClick={onRemove} className="absolute -top-2 -right-2 bg-white border rounded-full p-1 text-gray-400 hover:text-red-500 shadow-sm z-10">✕</button>
 
-            {/* LEFT SIDE: UPLOAD & CONTROLS (Fixed width, never expands) */}
-            <div className={`w-72 flex-shrink-0 flex flex-col gap-3 transition-all`}>
+            {/* LEFT SIDE: Fixed height container */}
+            <div className="w-72 flex-shrink-0 flex flex-col justify-start gap-3">
                 <label
-                    onDragOver={(e) => {
-                        e.preventDefault(); 
-                        e.stopPropagation();
-                    }}
+                    onDragOver={(e) => { e.preventDefault(); e.stopPropagation(); }}
                     onDrop={(e) => {
-                        e.preventDefault(); 
-                        e.stopPropagation();
-                        if (e.dataTransfer.files?.[0]) {
-                            setFile(e.dataTransfer.files[0]);
-                        }
+                        e.preventDefault(); e.stopPropagation();
+                        if (e.dataTransfer.files?.[0]) setFile(e.dataTransfer.files[0]);
                     }}
-                    className={`flex-1 flex flex-col items-center justify-center border-2 border-dotted border-gray-200 rounded-lg p-4 text-center cursor-pointer hover:border-black transition-colors bg-gray-50 min-h-[100px] overflow-hidden`}
+                    className="h-40 flex flex-col items-center justify-center border-2 border-dotted border-gray-200 rounded-lg p-4 text-center cursor-pointer hover:border-black transition-colors bg-gray-50 overflow-hidden"
                 >
                     <span className="text-xs text-gray-500 font-medium break-all px-2">
                         {file ? file.name : "Drag & Drop or Click"}
@@ -86,18 +80,18 @@ export default function DocumentBox({ onRemove, triggerProcess }: { onRemove: ()
                         disabled={!file || loading}
                         className="w-full py-2 border border-black bg-transparent text-black transition-all hover:bg-black hover:text-white rounded-lg text-sm font-semibold disabled:border-gray-200 disabled:text-gray-300"
                     >
-                        {loading ? "..." : "Process"}
+                        {loading ? "Processing..." : "Process"}
                     </button>
                     <button
                         onClick={handleReset}
-                        className="w-full py-2 border border-black bg-transparent text-black transition-all hover:bg-black hover:text-white rounded-lg text-sm font-medium"
+                        className="w-full py-2 border border-gray-200 bg-transparent text-gray-500 transition-all hover:bg-gray-100 rounded-lg text-sm font-medium"
                     >
                         Reset
                     </button>
                 </div>
             </div>
 
-            {/* RIGHT SIDE: TABLE (Only visible if hasData) */}
+            {/* RIGHT SIDE: TABLE */}
             {hasData && (
                 <div className="flex-grow border-l pl-6 overflow-hidden animate-in fade-in slide-in-from-left-2 duration-500">
                     <table className="w-full text-left text-sm border-collapse table-fixed">
@@ -105,24 +99,49 @@ export default function DocumentBox({ onRemove, triggerProcess }: { onRemove: ()
                             <tr className="border-b text-gray-400 uppercase text-[10px] tracking-wider">
                                 <th className="py-2 w-1/3">Field</th>
                                 <th className="py-2 w-1/2">Value</th>
-                                <th className="py-2 w-[40px] text-right">Page no</th>
+                                <th className="py-2 w-[60px] text-right">Page</th>
                             </tr>
                         </thead>
-                        <tbody className="divide-y">
+                       <tbody className="divide-y">
                             {EXPECTED_FIELDS.map((key) => {
                                 const obj = parsedData[key];
+                                const rawValue = Array.isArray(obj) ? obj[0] : null;
+                                const pageNo = Array.isArray(obj) ? obj[1] : "";
+                                
+                                // 1. Handle "Not Found" logic
+                                const isDataReady = rawText.length > 0 || !loading;
+                                const isEmpty = isDataReady && (rawValue === null || rawValue === undefined || rawValue === "");
+                                
+                                // 2. Handle Percentage Logic
+                                let displayValue = rawValue;
+                                if (key === "EmployeeContributionLimit" && rawValue && !String(rawValue).includes("%")) {
+                                    displayValue = `${rawValue}%`;
+                                }
+
                                 return (
-                                    <tr key={key} className="align-top">
-                                        <td className="py-3 font-semibold text-gray-700 truncate pr-4 italic">
+                                    <tr key={key} className="align-top hover:bg-gray-50 transition-colors">
+                                        <td className="py-3 font-semibold text-gray-700 truncate pr-4 text-[13px]">
+                                            {/* Add % to label if you prefer it there instead of the value */}
                                             {key.replace(/([A-Z])/g, ' $1').trim()}
+                                            {key === "EmployeeContributionLimit" && " (%)"}
                                         </td>
                                         <td className="py-3 text-gray-600">
-                                            <div className="max-h-24 overflow-y-auto leading-relaxed scrollbar-thin pr-2">
-                                                {Array.isArray(obj) ? String(obj[0]) : <span className="text-gray-300">...</span>}
+                                            <div className="max-h-24 overflow-y-auto leading-relaxed pr-2 text-[13px]">
+                                                {loading && !rawValue ? (
+                                                    <span className="flex gap-1 items-center py-1">
+                                                        <span className="w-1.5 h-1.5 bg-gray-300 rounded-full animate-bounce [animation-delay:-0.3s]"></span>
+                                                        <span className="w-1.5 h-1.5 bg-gray-300 rounded-full animate-bounce [animation-delay:-0.15s]"></span>
+                                                        <span className="w-1.5 h-1.5 bg-gray-300 rounded-full animate-bounce"></span>
+                                                    </span>
+                                                ) : isEmpty ? (
+                                                    <span className="text-red-400 font-medium italic">Not Found</span>
+                                                ) : (
+                                                    displayValue || <span className="text-gray-200">—</span>
+                                                )}
                                             </div>
                                         </td>
-                                        <td className="py-3 text-right text-gray-400 font-mono">
-                                            {Array.isArray(obj) ? obj[1] : ""}
+                                        <td className="py-3 text-right text-gray-400 font-mono text-[11px]">
+                                            {pageNo}
                                         </td>
                                     </tr>
                                 );
