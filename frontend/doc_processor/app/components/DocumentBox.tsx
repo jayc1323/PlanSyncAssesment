@@ -103,49 +103,58 @@ export default function DocumentBox({ onRemove, triggerProcess }: { onRemove: ()
                             </tr>
                         </thead>
                        <tbody className="divide-y">
-                            {EXPECTED_FIELDS.map((key) => {
-                                const obj = parsedData[key];
-                                const rawValue = Array.isArray(obj) ? obj[0] : null;
-                                const pageNo = Array.isArray(obj) ? obj[1] : "";
-                                
-                                // 1. Handle "Not Found" logic
-                                const isDataReady = rawText.length > 0 || !loading;
-                                const isEmpty = isDataReady && (rawValue === null || rawValue === undefined || rawValue === "");
-                                
-                                // 2. Handle Percentage Logic
-                                let displayValue = rawValue;
-                                if (key === "EmployeeContributionLimit" && rawValue && !String(rawValue).includes("%")) {
-                                    displayValue = `${rawValue}%`;
-                                }
+                          {EXPECTED_FIELDS.map((key) => {
+                                        const obj = parsedData[key];
+                                        // Check if it's an array and grab the first element
+                                        const rawValue = Array.isArray(obj) ? obj[0] : null;
+                                        const pageNo = Array.isArray(obj) ? obj[1] : "";
+                                        
+                                        // LOGIC FIX: Check if the value is specifically null/undefined/empty string
+                                        // We check (rawValue !== true && rawValue !== false) to ensure booleans aren't marked as "Empty"
+                                        const isDataMissing = (rawValue === null || rawValue === undefined || rawValue === "");
+                                        const isEmpty = !loading && rawText.length > 0 && isDataMissing;
+                                        
+                                        // Formatting Logic
+                                        let displayValue: any = rawValue;
 
-                                return (
-                                    <tr key={key} className="align-top hover:bg-gray-50 transition-colors">
-                                        <td className="py-3 font-semibold text-gray-700 truncate pr-4 text-[13px]">
-                                            {/* Add % to label if you prefer it there instead of the value */}
-                                            {key.replace(/([A-Z])/g, ' $1').trim()}
-                                            {key === "EmployeeContributionLimit" && " (%)"}
-                                        </td>
-                                        <td className="py-3 text-gray-600">
-                                            <div className="max-h-24 overflow-y-auto leading-relaxed pr-2 text-[13px]">
-                                                {loading && !rawValue ? (
-                                                    <span className="flex gap-1 items-center py-1">
-                                                        <span className="w-1.5 h-1.5 bg-gray-300 rounded-full animate-bounce [animation-delay:-0.3s]"></span>
-                                                        <span className="w-1.5 h-1.5 bg-gray-300 rounded-full animate-bounce [animation-delay:-0.15s]"></span>
-                                                        <span className="w-1.5 h-1.5 bg-gray-300 rounded-full animate-bounce"></span>
-                                                    </span>
-                                                ) : isEmpty ? (
-                                                    <span className="text-red-400 font-medium italic">Not Found</span>
-                                                ) : (
-                                                    displayValue || <span className="text-gray-200">—</span>
-                                                )}
-                                            </div>
-                                        </td>
-                                        <td className="py-3 text-right text-gray-400 font-mono text-[11px]">
-                                            {pageNo}
-                                        </td>
-                                    </tr>
-                                );
-                            })}
+                                        // Handle Booleans (Safe Harbor often comes back as true/false)
+                                        if (typeof rawValue === "boolean") {
+                                            displayValue = rawValue ? "Yes" : "No";
+                                        } 
+                                        // Handle Percentage
+                                        else if (key === "EmployeeContributionLimit" && rawValue) {
+                                            const strVal = String(rawValue);
+                                            displayValue = strVal.includes("%") ? strVal : `${strVal}%`;
+                                        }
+
+                                        return (
+                                            <tr key={key} className="align-top hover:bg-gray-50 transition-colors">
+                                                <td className="py-3 font-semibold text-gray-700 text-[13px]">
+                                                    {key.replace(/([A-Z])/g, ' $1').trim()}
+                                                    {key === "EmployeeContributionLimit" && " (%)"}
+                                                </td>
+                                                <td className="py-3 text-gray-600">
+                                                    <div className="max-h-24 overflow-y-auto leading-relaxed pr-2 text-[13px]">
+                                                        {loading && isDataMissing ? (
+                                                            <span className="flex gap-1 items-center py-1">
+                                                                <span className="w-1.5 h-1.5 bg-blue-400 rounded-full animate-bounce [animation-delay:-0.3s]"></span>
+                                                                <span className="w-1.5 h-1.5 bg-blue-400 rounded-full animate-bounce [animation-delay:-0.15s]"></span>
+                                                                <span className="w-1.5 h-1.5 bg-blue-400 rounded-full animate-bounce"></span>
+                                                            </span>
+                                                        ) : isEmpty ? (
+                                                            <span className="text-amber-600 font-medium italic bg-amber-50 px-1.5 py-0.5 rounded">Not Found</span>
+                                                        ) : (
+                                                            // Render the displayValue (Yes/No/String/etc)
+                                                            <span className="font-medium text-gray-800">{String(displayValue ?? "")}</span>
+                                                        )}
+                                                    </div>
+                                                </td>
+                                                <td className="py-3 text-right text-gray-400 font-mono text-[11px]">
+                                                    {pageNo}
+                                                </td>
+                                            </tr>
+                                        );
+                                    })}
                         </tbody>
                     </table>
                 </div>
