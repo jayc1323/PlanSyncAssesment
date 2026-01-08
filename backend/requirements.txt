@@ -42,3 +42,4 @@ watchfiles==1.1.1
 websockets==15.0.1
 google-genai==1.56.0
 pyPDF2==3.0.1
+sqlmodel==0.0.31
