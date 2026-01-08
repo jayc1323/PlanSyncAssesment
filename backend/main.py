@@ -6,6 +6,14 @@ from pydantic import BaseModel,types,Field
 from PyPDF2 import PdfReader
 import asyncio
 from fastapi.middleware.cors import CORSMiddleware
+import os
+from dotenv import load_dotenv
+
+load_dotenv() # Only needed for local development
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
+
+if not GEMINI_API_KEY:
+    raise ValueError("GEMINI_API_KEY is not set in the environment!")
 
 
 
