@@ -15,9 +15,11 @@
                      the LLM to return null for documents which are not 401k policies or if the field is not found.
  
  ## LLM Call:
- Used pyPDF2 to convert user uploaded pdf to text and passed it as the prompt parameter to 'generate_content_stream' function for gemini client which works as per requirement and returns 
+-  Used pyPDF2 to convert user uploaded pdf to text and passed it as the prompt parameter to 'generate_content_stream' function for gemini client which works as per requirement and returns 
                     the response as a stream . Requested structured outputs from the LLM Call by explicitly passing the DocumentData json schema as 
-                    a requirement so that responses are restricted to JSON objects of the class and no unnecessary data is retrieved - this makes passing the responses on to the user straightforward without requiring backend to process the LLM output further , which avoids further delay.
+                    a requirement so that responses are restricted to JSON objects of the class and no unnecessary data is retrieved - this makes passing the responses on to the user straightforward without requiring backend to process the LLM output further , which avoids further delay. 
+
+- Prompt - The text from the pdf is sent as the prompt and page numbers are added to help the LLM retrieve  the page numbers as well with each associated field. Also added to the field description is a statement encouraging LLM to return null if the field is not found and this works correctly as the LLM retrieves null for fields when documents are not 401k policies. The temperature is set to 0 so the output is more deterministic.
 
 ## Parallel Processing:
 Using async/await wherever possible for blocking operations like llm api call, setting database functionality as a background task to maintain high throughput . Running the backend with multiple workers to handle more documents in parallel.
